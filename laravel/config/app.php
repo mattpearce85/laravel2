@@ -144,6 +144,11 @@ return [
         App\Providers\AppServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        
+        /*
+         * Third Party Service Providers
+         */
+        Fideloper\Proxy\TrustedProxyServiceProvider::class,
 
     ],
 
