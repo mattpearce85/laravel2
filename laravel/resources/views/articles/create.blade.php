@@ -5,7 +5,7 @@
     
     <hr>
     
-    {!! Form::open(['action' => 'ArticlesController@store']) !!}
+    {!! Form::model($article = new \App\Article, ['action' => 'ArticlesController@store']) !!}
         @include('articles.form', ['submitButtonText' => 'Add Article'])
     {!! Form::close() !!}
     

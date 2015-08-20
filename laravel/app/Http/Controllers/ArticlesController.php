@@ -9,6 +9,7 @@ use App\Http\Requests;
 use App\Http\Requests\ArticleRequest;
 use App\Http\Controllers\Controller;
 use App\Article;
+use App\Tag;
 
 class ArticlesController extends Controller
 {
@@ -22,35 +23,50 @@ class ArticlesController extends Controller
         return view('articles.index', ['articles' => $articles]);
     }
     
-    public function show($id) {
-        $article = Article::findOrFail($id);
-        
+    public function show(Article $article) {
         return view('articles.show', ['article' => $article]);
     }
     
     public function create() {
-        return view('articles.create');
+        $tags = Tag::lists('name', 'id');
+        
+        return view('articles.create', ['tags' => $tags]);
     }
     
     public function store(ArticleRequest $request) {
-        $article = new Article($request->all());
+        $this->createArticle($request);
         
-        \Auth::user()->articles()->save($article);
+        flash()->overlay('Your article has been successfully created!', 'Good Job');
         
         return redirect('articles');
     }
     
-    public function edit($id) {
-        $article = Article::findOrFail($id);
+    public function edit(Article $article) {
+        $tags = Tag::lists('name', 'id');
         
-        return view('articles.edit', ['article' => $article]);
+        return view('articles.edit', ['article' => $article, 'tags' => $tags]);
     }
     
-    public function update($id, ArticleRequest $request) {
-        $article = Article::findOrFail($id);
-        
+    public function update(Article $article, ArticleRequest $request) {
         $article->update($request->all());
         
+        $this->syncTags($article, $request->input('tag_list'));
+        
         return redirect('articles');
+    }
+    
+    private function syncTags(Article $article, $tags) {
+        if (!is_array($tags)) {
+            $tags = [];
+        }
+        $article->tags()->sync($tags);
+    }
+    
+    private function createArticle(ArticleRequest $request) {
+        $article = \Auth::user()->articles()->create($request->all());
+        
+        $this->syncTags($article, $request->input('tag_list'));
+        
+        return $article;
     }
 }
